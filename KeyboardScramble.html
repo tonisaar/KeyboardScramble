@@ -8,31 +8,25 @@
 <title>Bad Keyboard</title>
 
 <style>
-body {
-	margin:0px;
-	padding:0px;
-	font-size:1em;
-}
-caption {
-	color:#999;
-	font:1em "deja vu","lucida console",monospace;
-	caption-side:bottom;
-}
 .title {
-	color:#bbb;
+	color:#777;
 	font:3em "times new roman",serif;
 	line-height:0.8em;
 	vertical-align:center;
 	padding:0px 10px;
 }
 .help {
-	color:#999;
+	color:#666;
 	font:italic 0.9em arial,sans-serif;
 	vertical-align:top;
 }
 select {
 	font:italic 0.9em arial,sans-serif;
-	color:#999;
+	color:#666;
+}
+#progress {
+	color:#666;
+	font:1em "deja vu","lucida console",monospace;
 }
 #keyboard {
 	position:relative;
@@ -148,6 +142,7 @@ function keyPressed(e) {
 		}
 	}
 	return false;
+	//return true;
 }
 function clearResultHighlights() {
 	for (i = 0; i < resultHighlights.length; ++i) {
@@ -298,29 +293,22 @@ function setKeyboard() {
 </script>
 </head>
 <body onkeydown="return keyPressed(event);" onload="setKeyboard();">
-<table>
-	<caption id="progress">Press a letter key on keyboard to start a new game.<br>&nbsp;</caption>
-	<tbody>
-		<tr>
-			<td class="title">Bad Keyboard</td>
-			<td class="help">
-				Press two keys on keyboard to exchange keys.<br>
-				Objective is to arrange keys as your keyboard.<br>
-				Keyboard:
-				<select id="keyboard_select" onchange="setKeyboard();">
-					<option value="QWERTY">QWERTY</option>
-					<option value="Dvorak">Dvorak</option>
-					<option value="Colemak">Colemak</option>
-				</select>
-				Scramble:
-				<select id="scramble_select" onchange="setKeyboard();">
-					<option value="single">single</option>
-					<option value="pair">pair</option>
-				</select><br>
-			</td>
-		</tr>
-	</tbody>
-</table>
+<h1 class="title">Keyboard Scramble blind typing game</h1>
+<p class="help">Press two keys on keyboard to exchange keys.<br>
+Objective is to arrange keys as your keyboard.<br>
+Keyboard:
+<select id="keyboard_select" onchange="setKeyboard();">
+	<option value="QWERTY">QWERTY</option>
+	<option value="Dvorak">Dvorak</option>
+	<option value="Colemak">Colemak</option>
+</select>
+Scramble:
+<select id="scramble_select" onchange="setKeyboard();">
+	<option value="single">single</option>
+	<option value="pair">pair</option>
+</select><br>
+</p>
+<p id="progress">Press a letter key on keyboard to start a new game.<br>&nbsp;</p>
 <div id="keyboard"><p>JavaScript seems to be disabled. Cannot draw keyboard.</p></div>
 </body>
 </html>
