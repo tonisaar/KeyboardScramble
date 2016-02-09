@@ -89,7 +89,9 @@ select {
 <script type="text/javascript">
 
 //TODO Inline event handlers may be bad practice. 
-//TODO try not to consume all keyoard events.
+//TODO try not to consume all keyboard events.
+//TODO use === for comparison, and use null.
+//TODO use value rather than text in option.
 //TODO refactor setKeyboard() to one function.
 
 var startTime;
@@ -221,7 +223,7 @@ function updateProgress() {
 		return;
 	}
 	document.getElementById("progress").innerHTML = '&nbsp;<br>Time: ' + min + ':' + sec + '; misplaced: ' + badKeyCount + "; moves: " + moves + ';';
-	setTimeout('updateProgress()', 100);//this supicious looking line just calls the function once, no need to panic. 
+	setTimeout('updateProgress()', 100);//this suspicious looking line just calls the function once, no need to panic. 
 }
 function createKey(lineNum, lineKeyNum, key) {
 	if (lineNum == 0) {
@@ -235,6 +237,36 @@ function createKey(lineNum, lineKeyNum, key) {
 			(lineStartX + lineKeyNum * 60) + 'px;top:' + (keyboardStartY + lineNum * 65) +
 			'px;">' + key + '</span>';
 }
+//refactoring start
+var layouts = {
+		QWERTY : [{start :  0, keys: "QWERTYUIOP"},
+						{start : 0, keys : "ASDFGHJKL"},
+						{start : 1, keys : "ZXCVBNM"}]//beware that start 1
+};
+var hardware = {
+	keyWidth : 60,
+	keyHeight : 65,
+	rowOffset : [20, 35, 5]
+}
+function setKeyboard2(layout) {
+	var kbrd = '';
+	for (var i = 0; i < layout.length; ++i) {
+		kbrd += drawRow2(layout[i], hardware['rowOffset'][i], i * hardware['keyHeight']);
+	}
+	kbrd += bumps;
+	document.getElementById('keyboard').innerHTML = kbrd;
+}
+function drawRow2(row, x,y) {
+	var result = '';
+	for (var i = 0; i < row['keys'].length; ++i) {
+		result += drawKey2(row['keys'].charAt(i), x + (row['start'] + i) * hardware['keyWidth'], y);
+	}
+	return result;
+}
+function drawKey2(key, x, y) {
+	return '<span id="' + key + '" class="key" style="left:' + x + 'px;top:' + y + 'px;">' + key + '</span>';
+}
+//refactoring end
 function setQwerty() {
 	var kbrd = '';
 	for (var i = 0; i < 10; ++i) {
@@ -282,7 +314,7 @@ function setKeyboard() {
 	var sel = document.getElementById('keyboard_select');
 	var kbrd = sel.options[sel.selectedIndex].text;
 	if (kbrd === "QWERTY") {
-		setQwerty();
+		setKeyboard2(layouts[kbrd]);
 	} else if (kbrd === "Dvorak") {
 		setDvorak();
 	} else if (kbrd === "Colemak") {
