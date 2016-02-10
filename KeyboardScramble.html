@@ -91,12 +91,11 @@ select {
 //TODO inline event handlers may be bad practice. 
 //TODO try not to consume all keyboard events.
 //TODO use === for comparison, and use null.
-//TODO use value rather than text in option.
-//TODO use events in select.
 //TODO check game start.
 
-//TODO refactor setKeyboard() to one function.
-//use layout while scrambling
+//WIP refactor setKeyboard() to one function.
+//maybe get layout name from event.target.value when drawing keyboard
+//bumps looks like hardware, and should be calculated from key sizes
 
 var startTime;
 var badKeyCount = -1;//number of misplaced keys, -1 if game has not started.
@@ -111,6 +110,22 @@ var dvorakKeys = 'PYFGCRLAOEUIDHTNSQJKXBMWVZ';
 var colemakKeys = 'QWFPGJLUYARSTDHNEIOZXCVBKM';
 var bumps = '<span class="bump" style="left:215px;top:91px;">_</span>' +
 		'<span class="bump" style="left:395px;top:91px;">_</span>';
+var layouts = {
+		QWERTY : [{start :  0, keys: 'QWERTYUIOP'},
+						{start : 0, keys : 'ASDFGHJKL'},
+						{start : 1, keys : 'ZXCVBNM'}],
+		Dvorak : [{start :  3, keys: 'PYFGCRL'},
+						{start : 0, keys : 'AOEUIDHTNS'},
+						{start : 2, keys : 'QJKXBMWVZ'}],
+		Colemak : [{start :  0, keys: 'QWFPGJLUY'},
+						{start : 0, keys : 'ARSTDHNEIO'},
+						{start : 1, keys : 'ZXCVBKM'}]
+};
+var hardware = {
+	keyWidth : 60,
+	keyHeight : 65,
+	rowOffset : [20, 35, 5]
+}
 
 function getChar(e) {
 	var keyNum;
@@ -169,7 +184,7 @@ function highlightMoveResult(key, content, otherContent) {
 }
 function scrambleAndStart() {//neither scramble type no longer works with an odd number of keys.
 	var sel = document.getElementById('scramble_select');
-	var scramble_type = sel.options[sel.selectedIndex].text;
+	var scramble_type = sel.options[sel.selectedIndex].value;
 	if (scramble_type === 'single') {
 		scrambleSingleKeys();
 	} else if (scramble_type === 'pair') {
@@ -181,7 +196,8 @@ function scrambleAndStart() {//neither scramble type no longer works with an odd
 	updateProgress();
 }
 function scrambleSingleKeys() {
-	var leftKeys = qwertyKeys;
+	var allKeys = getAllKeys();
+	var leftKeys = allKeys;
 	var tmpKeys;
 	var key;
 	for (i = 0; i < qwertyKeys.length; ++i) {
@@ -191,11 +207,11 @@ function scrambleSingleKeys() {
 		key = tmpKeys.charAt(Math.floor(Math.random() * tmpKeys.length));
 		//selected key is removed from among leftKeys
 		leftKeys = leftKeys.replace(key, '');
-		document.getElementById(key).innerHTML = qwertyKeys.charAt(i);
+		document.getElementById(key).innerHTML = allKeys.charAt(i);
 	}
 }
 function scrambleKeyPairs() {
-	var leftKeys = qwertyKeys;
+	var leftKeys = getAllKeys();
 	var key1;
 	var key2;
 	while (leftKeys.length > 0) {
@@ -207,6 +223,14 @@ function scrambleKeyPairs() {
 		document.getElementById(key2).innerHTML = key1;
 	}
 }
+function getAllKeys() {
+	var result = '';
+	layouts['QWERTY'].forEach(function(x) {
+		result += x['keys'];
+	});
+	return result;
+}
+
 function updateProgress() {
 	var time = new Date().getTime() - startTime;//seems to work ok even when time passes midnight.
 	var sec = Math.floor(time % 60000 / 1000);
@@ -228,48 +252,31 @@ function updateProgress() {
 	document.getElementById("progress").innerHTML = '&nbsp;<br>Time: ' + min + ':' + sec + '; misplaced: ' + badKeyCount + "; moves: " + moves + ';';
 	setTimeout('updateProgress()', 100);//this suspicious looking line just calls the function once, no need to panic. 
 }
-//refactoring start
-var layouts = {
-		QWERTY : [{start :  0, keys: 'QWERTYUIOP'},
-						{start : 0, keys : 'ASDFGHJKL'},
-						{start : 1, keys : 'ZXCVBNM'}],
-		Dvorak : [{start :  3, keys: 'PYFGCRL'},
-						{start : 0, keys : 'AOEUIDHTNS'},
-						{start : 2, keys : 'QJKXBMWVZ'}],
-		Colemak : [{start :  0, keys: 'QWFPGJLUY'},
-						{start : 0, keys : 'ARSTDHNEIO'},
-						{start : 1, keys : 'ZXCVBKM'}]
-};
-var hardware = {
-	keyWidth : 60,
-	keyHeight : 65,
-	rowOffset : [20, 35, 5]
-}
-function setKeyboard2(layout) {
-	var kbrd = '';
-	for (var i = 0; i < layout.length; ++i) {
-		kbrd += drawRow2(layout[i], hardware['rowOffset'][i], i * hardware['keyHeight']);
-	}
-	kbrd += bumps;
-	document.getElementById('keyboard').innerHTML = kbrd;
-}
-function drawRow2(row, x,y) {
-	var result = '';
-	for (var i = 0; i < row['keys'].length; ++i) {
-		result += drawKey2(row['keys'].charAt(i), x + (row['start'] + i) * hardware['keyWidth'], y);
-	}
-	return result;
-}
-function drawKey2(key, x, y) {
-	return '<span id="' + key + '" class="key" style="left:' + x + 'px;top:' + y + 'px;">' + key + '</span>';
-}
-//refactoring end
+
 function setKeyboard() {
 	keyDown = '';
 	var sel = document.getElementById('keyboard_select');
 	var kbrd = sel.options[sel.selectedIndex].value;
-	setKeyboard2(layouts[kbrd]);
+	drawKeyboard(layouts[kbrd]);
 	badKeyCount = -1;
+}
+function drawKeyboard(layout) {
+	var kbrd = '';
+	for (var i = 0; i < layout.length; ++i) {
+		kbrd += drawRow(layout[i], hardware['rowOffset'][i], i * hardware['keyHeight']);
+	}
+	kbrd += bumps;
+	document.getElementById('keyboard').innerHTML = kbrd;
+}
+function drawRow(row, x, y) {
+	var result = '';
+	for (var i = 0; i < row['keys'].length; ++i) {
+		result += drawKey(row['keys'].charAt(i), x + (row['start'] + i) * hardware['keyWidth'], y);
+	}
+	return result;
+}
+function drawKey(key, x, y) {
+	return '<span id="' + key + '" class="key" style="left:' + x + 'px;top:' + y + 'px;">' + key + '</span>';
 }
 </script>
 </head>
