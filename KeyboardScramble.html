@@ -89,10 +89,11 @@ select {
 <script type="text/javascript">
 
 //TODO inline event handlers may be bad practice, there seems to be element.on("click", function() {...}). 
-//TODO try not to consume all keyboard events, one way is keyPressed(e) {... return true;}.
 //TODO use === for comparison, and use null.
 //TODO initialize variables.
 //TODO check game start.
+//TODO conversion from tabs to spaces and back.
+//TODO is rowOffsetNorm a good name?
 
 var startTime;
 var badKeyCount = -1;//number of misplaced keys, -1 if game has not started.
@@ -126,31 +127,40 @@ var hardware = {
 }
 
 function keyPressed(e) {
+	if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) {
+		return true;
+	}
 	var keyNow = String.fromCharCode(e.which || e.keyCode);//IE9/Firefox/Chrome/Opera/Safari || IE8 and earlier
 	if (letterPatt.test(keyNow)) {
-		if (badKeyCount == -1) {
-			scrambleAndStart();
-		}
-		if (!keyDown) {
-			clearResultHighlights();
-			keyDown = keyNow;
-			document.getElementById(keyDown).setAttribute('class', 'key_down');
-		} else if (keyNow == keyDown) {
-			document.getElementById(keyDown).setAttribute('class', 'key');
-			keyDown = '';
-		} else {
-			var keyDownContent = document.getElementById(keyDown).innerHTML;
-			var keyNowContent = document.getElementById(keyNow).innerHTML;
-			highlightMoveResult(keyNow, keyNowContent, keyDownContent);
-			highlightMoveResult(keyDown, keyDownContent, keyNowContent);
-			document.getElementById(keyNow).innerHTML = keyDownContent;
-			document.getElementById(keyDown).innerHTML = keyNowContent;
-			keyDown = '';
-			++moves;
-		}
+		processLetter(keyNow);
+		return false;//if layout selection has focus, pressing "D" does not select Dvorak.
 	}
 	return true;
 }
+
+function processLetter(keyNow) {
+	if (badKeyCount == -1) {
+		scrambleAndStart();
+	}
+	if (!keyDown) {
+		clearResultHighlights();
+		keyDown = keyNow;
+		document.getElementById(keyDown).setAttribute('class', 'key_down');
+	} else if (keyNow == keyDown) {
+		document.getElementById(keyDown).setAttribute('class', 'key');
+		keyDown = '';
+	} else {
+		var keyDownContent = document.getElementById(keyDown).innerHTML;
+		var keyNowContent = document.getElementById(keyNow).innerHTML;
+		highlightMoveResult(keyNow, keyNowContent, keyDownContent);
+		highlightMoveResult(keyDown, keyDownContent, keyNowContent);
+		document.getElementById(keyNow).innerHTML = keyDownContent;
+		document.getElementById(keyDown).innerHTML = keyNowContent;
+		keyDown = '';
+		++moves;
+	}
+}
+
 function clearResultHighlights() {
 	for (i = 0; i < resultHighlights.length; ++i) {
 		document.getElementById(resultHighlights.charAt(i)).setAttribute('class', 'key');
@@ -194,7 +204,7 @@ function scrambleSingleKeys() {
 		key = tmpKeys.charAt(Math.floor(Math.random() * tmpKeys.length));
 		//selected key is removed from among leftKeys
 		leftKeys = leftKeys.replace(key, '');
-		document.getElementById(key).innerHTML = allKeys.charAt(i);
+		document.getElementById(key).innerHTML = allKeys.charAt(i);//TODO Uncaught TypeError: Cannot set property 'innerHTML' of null
 	}
 }
 function scrambleKeyPairs() {
@@ -274,7 +284,7 @@ function bumpText() {
 </script>
 </head>
 <body onkeydown="return keyPressed(event);" onload="setKeyboard();">
-<h1 class="title">Keyboard Scramble blind typing game</h1>
+<h1 class="title">Keyboard Scramble touch typing game</h1>
 <p class="help">Press two keys on keyboard to exchange keys.<br>
 Objective is to arrange keys as your keyboard.<br>
 Keyboard:
