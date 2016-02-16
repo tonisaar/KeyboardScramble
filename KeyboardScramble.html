@@ -89,17 +89,17 @@ select {
 <script type="text/javascript">
 
 //TODO inline event handlers may be bad practice, there seems to be element.on("click", function() {...}). 
-//TODO use === for comparison, and use null.
 //TODO initialize variables.
 //TODO check game start.
 //TODO conversion from tabs to spaces and back.
-//TODO is rowOffsetNorm a good name?
+//TODO are constants uppercase and what to do about them?
+//TODO if (!keyDown) is this  good idea?
 
-var startTime;
+var startTime = null;
 var badKeyCount = -1;//number of misplaced keys, -1 if game has not started.
 
-var moves;
-var keyDown;
+var moves = null;
+var keyDown = null;
 var resultHighlights = '';//keys that have been highlighted in any way (green if wrong became right, red if right became wrong).
 
 var letterPatt = /^[A-Z]{1}$/;
@@ -139,16 +139,16 @@ function keyPressed(e) {
 }
 
 function processLetter(keyNow) {
-	if (badKeyCount == -1) {
+	if (badKeyCount === -1) {
 		scrambleAndStart();
 	}
 	if (!keyDown) {
 		clearResultHighlights();
 		keyDown = keyNow;
 		document.getElementById(keyDown).setAttribute('class', 'key_down');
-	} else if (keyNow == keyDown) {
+	} else if (keyNow === keyDown) {
 		document.getElementById(keyDown).setAttribute('class', 'key');
-		keyDown = '';
+		keyDown = null;
 	} else {
 		var keyDownContent = document.getElementById(keyDown).innerHTML;
 		var keyNowContent = document.getElementById(keyNow).innerHTML;
@@ -156,7 +156,7 @@ function processLetter(keyNow) {
 		highlightMoveResult(keyDown, keyDownContent, keyNowContent);
 		document.getElementById(keyNow).innerHTML = keyDownContent;
 		document.getElementById(keyDown).innerHTML = keyNowContent;
-		keyDown = '';
+		keyDown = null;
 		++moves;
 	}
 }
@@ -167,11 +167,11 @@ function clearResultHighlights() {
 	}
 }
 function highlightMoveResult(key, content, otherContent) {
-	if (otherContent == key) {
+	if (otherContent === key) {
 		--badKeyCount;
 		resultHighlights += key;
 		document.getElementById(key).setAttribute('class', 'key_correct');
-	} else if (content == key) {
+	} else if (content === key) {
 		++badKeyCount;
 		resultHighlights += key;
 		document.getElementById(key).setAttribute('class', 'key_wrong');
@@ -179,18 +179,21 @@ function highlightMoveResult(key, content, otherContent) {
 		document.getElementById(key).setAttribute('class', 'key');
 	}
 }
-function scrambleAndStart() {//neither scramble type no longer works with an odd number of keys.
-	var sel = document.getElementById('scramble_select');
-	var scramble_type = sel.options[sel.selectedIndex].value;
-	if (scramble_type === 'single') {
-		scrambleSingleKeys();
-	} else if (scramble_type === 'pair') {
-		scrambleKeyPairs();
-	}
+function scrambleAndStart() {
+	scramble();
 	badKeyCount = getAllKeys().length;
 	moves = 0;
 	startTime = new Date().getTime();
 	updateProgress();
+}
+function scramble() {//neither scramble type (no longer) works with an odd number of keys.
+	var sel = document.getElementById('scramble_select');
+	var scrambleType = sel.options[sel.selectedIndex].value;
+	if (scrambleType === 'single') {
+		scrambleSingleKeys();
+	} else if (scrambleType === 'pair') {
+		scrambleKeyPairs();
+	}
 }
 function scrambleSingleKeys() {
 	var allKeys = getAllKeys();
@@ -235,11 +238,11 @@ function updateProgress() {
 	if (sec < 10) {
 		sec = '0' + sec;
 	}
-	if (badKeyCount == -1) {
+	if (badKeyCount === -1) {
 		clearResultHighlights();
 		document.getElementById('progress').innerHTML = 'Press a letter key on keyboard to start a new game.<br>&nbsp;';
 		return;
-	} else if (badKeyCount == 0) {
+	} else if (badKeyCount === 0) {
 		clearResultHighlights();
 		document.getElementById("progress").innerHTML = 'Excellent! Arranging keys took ' + min + ':' + sec + ' and ' + moves +
 				' moves.<br/>Press a letter key on keyboard to start a new game.';
