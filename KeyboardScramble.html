@@ -89,11 +89,12 @@ select {
 <script type="text/javascript">
 
 //TODO inline event handlers may be bad practice, there seems to be element.on("click", function() {...}). 
-//TODO initialize variables.
+//TODO does it make sense to initialize variables with null?
 //TODO check game start.
 //TODO conversion from tabs to spaces and back.
 //TODO are constants uppercase and what to do about them?
 //TODO if (!keyDown) is this  good idea?
+//TODO do i need to declate loop variable outside loop?
 
 var startTime = null;
 var badKeyCount = -1;//number of misplaced keys, -1 if game has not started.
@@ -140,7 +141,7 @@ function keyPressed(e) {
 
 function processLetter(keyNow) {
 	if (badKeyCount === -1) {
-		scrambleAndStart();
+		startGame();
 	}
 	if (!keyDown) {
 		clearResultHighlights();
@@ -179,7 +180,7 @@ function highlightMoveResult(key, content, otherContent) {
 		document.getElementById(key).setAttribute('class', 'key');
 	}
 }
-function scrambleAndStart() {
+function startGame() {
 	scramble();
 	badKeyCount = getAllKeys().length;
 	moves = 0;
@@ -198,8 +199,8 @@ function scramble() {//neither scramble type (no longer) works with an odd numbe
 function scrambleSingleKeys() {
 	var allKeys = getAllKeys();
 	var leftKeys = allKeys;
-	var tmpKeys;
-	var key;
+	var tmpKeys = null;
+	var key = null;
 	for (i = 0; i < allKeys.length; ++i) {
 		//tmpKeys is leftKeys except the correct allKeys key
 		tmpKeys = leftKeys.replace(allKeys.charAt(i), '');
@@ -212,8 +213,8 @@ function scrambleSingleKeys() {
 }
 function scrambleKeyPairs() {
 	var leftKeys = getAllKeys();
-	var key1;
-	var key2;
+	var key1 = null;
+	var key2 = null;
 	while (leftKeys.length > 0) {
 		key1 = leftKeys.charAt(Math.floor(Math.random() * leftKeys.length));
 		leftKeys = leftKeys.replace(key1, '');
@@ -254,7 +255,7 @@ function updateProgress() {
 }
 
 function setKeyboard() {
-	keyDown = '';
+	keyDown = null;
 	var sel = document.getElementById('keyboard_select');
 	var kbrd = sel.options[sel.selectedIndex].value;
 	drawKeyboard(layouts[kbrd]);
