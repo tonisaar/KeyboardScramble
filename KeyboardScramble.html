@@ -92,15 +92,12 @@ select {
 //TODO does it make sense to initialize variables with null?
 //TODO improve variable names.
 //TODO if (!keyDown) is this  good idea?
-//TODO do i need to declate loop variable outside loop?
-//TODO Private variables can be made possible with closures.
+//TODO do i need to declare loop variable outside loop?
+//TODO maybe there is some use for closures.
 //TODO Opera 11.51 key events other than keyup is incomplete, what does incomplete mean?
 
-//real todos:
-//TODO conversion from tabs to spaces and back.
-
 //wip:
-//TODO check game start.
+//TODO conversion from tabs to spaces and back.
 
 var startTime = null;
 var badKeyCount = -1;//number of misplaced keys, -1 if game has not started.
@@ -135,16 +132,12 @@ var HARDWARE = {
 
 window.onload = function() {//seems to work in IE, Chrome and Firefox.
 	setKeyboard();
-	window.onkeydown= keyPressed;
+	window.onkeydown= keyPressed;//the consensus against inline event handlers is not absolute.
 	document.getElementById('keyboard_select').onchange = setKeyboard;
 	document.getElementById('scramble_select').onchange = setKeyboard;
 }
 
 function keyPressed(e) {
-//	if (!e) {//from the internet, maybe this is more correct than mine below?
-//		var e = window.event;// e gives access to the event in all browsers
-//	}
-	var e = e || window.event;//i hate JavaScript already.
 	if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) {
 		return true;
 	}
@@ -222,21 +215,26 @@ function scrambleSingleKeys() {
 		//tmpKeys is leftKeys except the correct allKeys key
 		tmpKeys = leftKeys.replace(allKeys.charAt(i), '');
 		//bad key for allKeys.charAt(i) is selected from among tmpKeys
-		key = tmpKeys.charAt(Math.floor(Math.random() * tmpKeys.length));//TODO try to replace with first or last
+		key = tmpKeys.charAt(Math.floor(Math.random() * tmpKeys.length));
 		//selected key is removed from among leftKeys
 		leftKeys = leftKeys.replace(key, '');
 		
-//ok, suppose
-//leftKeys = allKeys = ABCD
-//for 1 = 0 to 3
-//i = 0
-//tmpKeys = BCD, select random, say, C
-//leftKeys = ABD
-//element C should be A
-
-//is some key
-
-		document.getElementById(key).innerHTML = allKeys.charAt(i);//TODO Uncaught TypeError: Cannot set property 'innerHTML' of null
+		//start of bug trap
+		var elem = document.getElementById(key);
+		if (!elem) {
+			alert("element for key " + key + " is " + elem);
+		}
+		elem.innerHTML = allKeys.charAt(i);
+		//end of bug trap
+		
+		//real line
+		//document.getElementById(key).innerHTML = allKeys.charAt(i);//TODO Uncaught TypeError: Cannot set property 'innerHTML' of null
+		//end of real line
+		
+		//tryed replacing random with always first and with always last letter in tmpKeys, but there was no error.
+		//according to docs there should be no problem:
+		//The random() method returns a random number from 0 (inclusive) up to but not including 1 (exclusive).
+		//replaced this error prone line with an ugly bug trap.
 	}
 }
 function scrambleKeyPairs() {
