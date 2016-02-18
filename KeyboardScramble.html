@@ -89,13 +89,14 @@ select {
 <script type="text/javascript">
 
 //TODO does it make sense to initialize variables with null?
-//TODO check game start.
 //TODO conversion from tabs to spaces and back.
 //TODO are constants uppercase and is there anything else special about them?
 //TODO if (!keyDown) is this  good idea?
 //TODO do i need to declate loop variable outside loop?
 //TODO Private variables can be made possible with closures.
 //TODO Opera 11.51 key events other than keyup is incomplete, what does incomplete mean?
+
+//WIP check game start.
 
 var startTime = null;
 var badKeyCount = -1;//number of misplaced keys, -1 if game has not started.
@@ -104,8 +105,8 @@ var moves = null;
 var keyDown = null;
 var resultHighlights = '';//keys that have been highlighted in any way (green if wrong became right, red if right became wrong).
 
-var letterPatt = /^[A-Z]{1}$/;
-var layouts = {
+var LETTER_PATTERN = /^[A-Z]{1}$/;
+var LAYOUTS = {
 		QWERTY : [{start :  0, keys: 'QWERTYUIOP'},
 						{start : 0, keys : 'ASDFGHJKL'},
 						{start : 1, keys : 'ZXCVBNM'}],
@@ -116,7 +117,7 @@ var layouts = {
 						{start : 0, keys : 'ARSTDHNEIO'},
 						{start : 1, keys : 'ZXCVBKM'}]
 };
-var hardware = {
+var HARDWARE = {
 	keyWidth : 60,
 	keyHeight : 65,
 	rowOffsetNorm : [0.25, 0.5, 0.0],
@@ -143,7 +144,7 @@ function keyPressed(e) {
 		return true;
 	}
 	var keyNow = String.fromCharCode(e.which || e.keyCode);//IE9/Firefox/Chrome/Opera/Safari || IE8 and earlier
-	if (letterPatt.test(keyNow)) {
+	if (LETTER_PATTERN.test(keyNow)) {
 		processLetter(keyNow);
 		return false;//if layout selection has focus, pressing D does not select Dvorak.
 	}
@@ -248,7 +249,7 @@ function scrambleKeyPairs() {
 }
 function getAllKeys() {
 	var result = '';
-	layouts['QWERTY'].forEach(function(x) {
+	LAYOUTS['QWERTY'].forEach(function(x) {
 		result += x['keys'];
 	});
 	return result;
@@ -280,13 +281,13 @@ function setKeyboard() {
 	keyDown = null;
 	var sel = document.getElementById('keyboard_select');
 	var kbrd = sel.options[sel.selectedIndex].value;
-	drawKeyboard(layouts[kbrd]);
+	drawKeyboard(LAYOUTS[kbrd]);
 	badKeyCount = -1;
 }
 function drawKeyboard(layout) {
 	var kbrd = '';
 	for (var i = 0; i < layout.length; ++i) {
-		kbrd += drawRow(layout[i], hardware.rowOffset(i), i * hardware['keyHeight']);
+		kbrd += drawRow(layout[i], HARDWARE.rowOffset(i), i * HARDWARE['keyHeight']);
 	}
 	kbrd += bumpText();
 	document.getElementById('keyboard').innerHTML = kbrd;
@@ -294,7 +295,7 @@ function drawKeyboard(layout) {
 function drawRow(row, x, y) {
 	var result = '';
 	for (var i = 0; i < row['keys'].length; ++i) {
-		result += drawKey(row['keys'].charAt(i), x + (row['start'] + i) * hardware['keyWidth'], y);
+		result += drawKey(row['keys'].charAt(i), x + (row['start'] + i) * HARDWARE['keyWidth'], y);
 	}
 	return result;
 }
@@ -302,9 +303,9 @@ function drawKey(key, x, y) {
 	return '<span id="' + key + '" class="key" style="left:' + x + 'px;top:' + y + 'px;">' + key + '</span>';
 }
 function bumpText() {
-	var bumpY = hardware.bumpY();
-	return '<span class="bump" style="left:' + hardware.bumpFX() + 'px;top:' + bumpY + 'px;">_</span>' +
-			'<span class="bump" style="left:' + hardware.bumpJX() + 'px;top:' + bumpY + 'px;">_</span>';
+	var bumpY = HARDWARE.bumpY();
+	return '<span class="bump" style="left:' + HARDWARE.bumpFX() + 'px;top:' + bumpY + 'px;">_</span>' +
+			'<span class="bump" style="left:' + HARDWARE.bumpJX() + 'px;top:' + bumpY + 'px;">_</span>';
 }
 </script>
 
